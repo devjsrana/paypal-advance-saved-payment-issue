@@ -15,7 +15,7 @@ export async function createOrder(body) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    body: body ? JSON.stringify({
+    body: JSON.stringify({
       intent: "CAPTURE",
       purchase_units: [
         {
@@ -23,9 +23,23 @@ export async function createOrder(body) {
             currency_code: "USD",
             value: purchaseAmount,
           },
+          shipping: {
+            type: 'SHIPPING',
+            name: {
+              full_name: "John Doe"
+            },
+            address: {
+              "address_line_1": "2211 N First Street",
+              "address_line_2": "Building 17",
+              "admin_area_2": "San Jose",
+              "admin_area_1": "CA",
+              "postal_code": "95131",
+              "country_code": "US"
+            }
+          }
         },
       ],
-      payment_source: {
+      payment_source: !body ? undefined : {
         card: {
           name: body.card_name,
           billing_address: body.billing_address,
@@ -36,7 +50,7 @@ export async function createOrder(body) {
           }
         }
       }
-    }) : undefined,
+    }),
   });
 
   return handleResponse(response);
@@ -82,7 +96,7 @@ export async function generateClientToken() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      customer_id: 'kxIaZbNwOZ'
+      customer_id: 'rQrtaCbsap'
     })
   });
   const jsonData = await handleResponse(response);
