@@ -9,34 +9,41 @@ export async function createOrder(body) {
   const purchaseAmount = "100.00"; // TODO: pull prices from a database
   const accessToken = await generateAccessToken();
   const url = `${base}/v2/checkout/orders`;
+  const data = {
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        amount: {
+          currency_code: "USD",
+          value: purchaseAmount,
+        },
+      },
+    ],
+    application_context: {
+      shipping_preference: "NO_SHIPPING"
+    }
+  };
+  if (body) {
+    data.payment_source = {
+      card: {
+        name: body.card_name,
+        billing_address: body.billing_address,
+        shipping_address: body.billing_address,
+        attributes: {
+          vault: {
+            store_in_vault: 'ON_SUCCESS'
+          }
+        }
+      }
+    }
+  }
   const response = await fetch(url, {
     method: "post",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    body: body ? JSON.stringify({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: purchaseAmount,
-          },
-        },
-      ],
-      payment_source: {
-        card: {
-          name: body.card_name,
-          billing_address: body.billing_address,
-          attributes: {
-            vault: {
-              store_in_vault: 'ON_SUCCESS'
-            }
-          }
-        }
-      }
-    }) : undefined,
+    body: JSON.stringify(data),
   });
 
   return handleResponse(response);
@@ -82,7 +89,7 @@ export async function generateClientToken() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      customer_id: 'kxIaZbNwOZ'
+      customer_id: 'mnmeOAksAy'
     })
   });
   const jsonData = await handleResponse(response);
